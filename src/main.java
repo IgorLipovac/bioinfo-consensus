@@ -9,11 +9,11 @@ public class main {
 	public static void main(String[] args) {
 		
 		Reader.setReadsFilePath(args[0]);
-		Map<Integer, Layout> test = Reader.GetLayout( args[1]);
+		Alignment test = Reader.GetLayout( args[1]);
 		List<Integer> keys = new ArrayList<Integer>(test.keySet());
 
 		for (Integer key: keys) {
-			Layout l=test.get(key);
+			Read l=test.get(key);
 		    System.out.println(key + ": " + l.offset +","+l.startIndex+","+l.endIndex);
 		    
 		}

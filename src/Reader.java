@@ -13,7 +13,6 @@ public class Reader {
 		readsFilePath = path;
 	}
 	
-	
 	public static char[] GetReadFromFasta(int index)
 	{
 		String sequence = null;
@@ -40,9 +39,9 @@ public class Reader {
 	}
 
 	
-	public static Map< Integer,Layout> GetLayout(String layoutPath)
+	public static Alignment GetLayout(String layoutPath)
 	{
-		Map<Integer, Layout> layouts = new HashMap<Integer, Layout>();
+		Map<Integer, Read> layouts = new HashMap<Integer, Read>();
 		BufferedReader br = null;
 		try{
 			String sCurrentLine;			
@@ -67,7 +66,7 @@ public class Reader {
 					sCurrentLine = br.readLine();
 					splitted = sCurrentLine.split("[:]");
 					int index = Integer.parseInt(splitted[1]);
-					Layout temp = new Layout(index, startInd, endInd, offset);
+					Read temp = new Read(index, startInd, endInd, offset);
 					layouts.put(Integer.parseInt(splitted[1]), temp);
 				}
 				else
@@ -82,6 +81,7 @@ public class Reader {
 		{
 			System.out.print(e.getMessage());
 		}
-		return layouts;
+		Alignment lays = new Alignment(layouts);
+		return lays;
 	}
 }

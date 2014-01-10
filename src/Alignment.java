@@ -27,11 +27,13 @@ public class Alignment {
 	
 	
 	public Read detachFromAlignmentOnIndex(Integer index) {
-		return null;
+		Read detached = this.layoutMap.get(index);
+		this.layoutMap.remove(index);
+		return detached;
 	}
 	
 	public void insertSequenceIntoAlignment(Read sequence) {
-	
+		this.layoutMap.put(sequence.readIndex, sequence);
 	}
 	
 	

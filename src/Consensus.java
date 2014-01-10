@@ -10,4 +10,7 @@ public class Consensus {
 	
 	public List<Metasymbol> symbols;
 	public double consensusScore;
+	
+
+	
 }

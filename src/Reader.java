@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -13,7 +15,7 @@ public class Reader {
 		readsFilePath = path;
 	}
 	
-	public static char[] GetReadFromFasta(int index)
+	public static List<Character> GetReadFromFasta(int index)
 	{
 		String sequence = null;
 		BufferedReader br = null;
@@ -35,7 +37,14 @@ public class Reader {
 		{
 			System.out.print(e.getMessage());
 		}
-		return sequence.toCharArray();
+		
+		char[] seqArray = sequence.toCharArray();
+		List<Character> cList = new ArrayList<Character>();
+		for(char c : seqArray) {
+		    cList.add(c);
+		}
+		
+		return cList;
 	}
 
 	

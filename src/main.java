@@ -9,7 +9,7 @@ public class main {
 		Reader.setReadsFilePath(args[0]);
 		Alignment test = Reader.GetLayout( args[1]);
 		//Realigner.getConsensus(test);
-		Realigner.reAlign(test, 20, 0.1);
+		Realigner.reAlign(test, 0.1);
 	}
 
 }

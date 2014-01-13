@@ -63,6 +63,7 @@ public class main {
 	
 		//Realigner.getConsensus(test);
 		for (int contig = 0; contig < test.size(); contig++) {
+			System.out.println("<===============================================================>");
 			System.out.println("Realigning contig/layout with ID:" + contig);
 			Consensus cons = Realigner.reAlign(test.get(contig), epsilon, iterationNumber);
 			cons.layoutID = contig;
@@ -73,6 +74,7 @@ public class main {
 				Writer.printUngappedConsensusToFile(cons,true);
 			}
 		}
+		System.out.println("<===============================================================>");
 		System.out.println("Results written in consensus.fasta and consensus_profile.txt");
 	}
 

@@ -43,6 +43,7 @@ public class Writer {
 			StringBuilder builder = new StringBuilder();
 			StringBuilder builder2 = new StringBuilder();
 			long written = 0;
+			long writtenInto2 = 0;
 			for (int i = 0; i < consensus.symbols.size(); i++) {
 				
 				ArrayList<Character> symbols = (ArrayList<Character>) consensus.symbols.get(i).symbols;
@@ -55,28 +56,39 @@ public class Writer {
 						if (index == 0) {
 							builder.append(consensus.symbols.get(i).symbols.get(1));
 							builder2.append(consensus.symbols.get(i).symbols.get(1));
+							writtenInto2++;
 						} else {
 							builder.append(consensus.symbols.get(i).symbols.get(0));
 							builder2.append(consensus.symbols.get(i).symbols.get(0));
+							writtenInto2++;
 						}
 					} else {
 						builder.append('n');
 						builder2.append("[");
+						writtenInto2++;
 						for (char c : consensus.symbols.get(i).symbols) {
 							builder2.append(c);
+							writtenInto2++;
 						}
 						builder2.append("]");
+						writtenInto2++;
 					}
 					
 				} else {
 					builder.append(consensus.symbols.get(i).symbols.get(0));
 					builder2.append(consensus.symbols.get(i).symbols.get(0));
+					writtenInto2++;
 				}
 				written++;
 				if (written % 60 == 0 && written!=0) {
 					builder.append('\n');
-					builder2.append('\n');
+					
 				}
+				if (writtenInto2 % 60 == 0 && writtenInto2!=0) {
+					builder2.append('\n');
+					
+				}
+				
 				
 			}
 			fr2.write(builder2.toString());

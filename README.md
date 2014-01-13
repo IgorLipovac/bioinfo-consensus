@@ -15,6 +15,7 @@ where -e parameter stands for epsilon - expected average layout error; and -i st
 
 For some testing purposes we used scripts from: https://github.com/vzupanovic/skripte
 More about the algorithm, results and program itself - see documentation!
+
 And also - please support:
 https://www.facebook.com/24hprojectchallenge
 

@@ -1,4 +1,4 @@
-|bioinfo-consensus| ReAligner
+bioinfo-consensus > ReAligner
 =================
 
 This program is created as a project assignment for Bioinformatics class (Faculty of Electrical Engineering and Computing, University of Zagreb).

@@ -6,7 +6,12 @@ import java.util.List;
 public class main {
 
 	public static void main(String[] args) {
-		
+		if (args.length < 2) {
+			System.out.println("Forgot input args? First argument is FASTA file containing the reads. "
+					+" Second argument is .afg file containing the layout information."
+					+ " Optional: -e<some_double_value_epsilon_error_rate> -i<some_int_value_max_iterations>");
+			return;
+		}
 		FileReader frFile;
 		try {
 			frFile = new FileReader(args[0]);

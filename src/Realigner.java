@@ -15,9 +15,12 @@ public class Realigner {
 			char[] column = getColumn(layoutMap,col);
 			Metasymbol consensusSymbol = getConsensusMetasymbol(column);
 			consensus.symbols.add(consensusSymbol);
-			consensus.consensusScore += getColumnScore(column, consensusSymbol);
+			consensus.consensusScore += 0.5*getColumnScore(column, consensusSymbol);
+			if (column.length > 0) {
+				consensus.consensusScore += 0.5* getColumnScore(column, consensusSymbol) / column.length;
+			}
 		}
-		//dashFunction(consensus);
+		
 		return consensus;
 	}
 	
@@ -152,7 +155,7 @@ public class Realigner {
 			Read current = layoutMap.get(key);
 			int minusOffset = columnsNum;
 			if (current.offset <= columnsNum) {
-				minusOffset -= current.offset;
+				minusOffset = current.offset;
 			} else {
 				minusOffset += (current.offset - columnsNum);
 			}
@@ -200,7 +203,7 @@ public class Realigner {
 	
 	
 	
-	private static double globalAlignment(Read seqA, Consensus seqB, double eps) {
+	private static double getAlignment(Read seqA, Consensus seqB, double eps) {
 		Read mSeqA = seqA;
         Consensus mSeqB = new Consensus();
         int[][] mD;
@@ -263,10 +266,10 @@ public class Realigner {
 	        		int scoreLeft = mD[i][j-1];
 	        		if (scoreLeft != Integer.MIN_VALUE) 
 	        			scoreLeft = mD[i][j-1] - 1;
-	        		//int scoreUp = mD[i-1][j];
-//	        		if (scoreUp != Integer.MIN_VALUE) 
-//	        			scoreUp = mD[i-1][j] - 1;
-	        		mD[i][j] = Math.max(scoreDiag, scoreLeft);//, scoreUp);
+	        		int scoreUp = mD[i-1][j];
+	        		if (scoreUp != Integer.MIN_VALUE) 
+	        			scoreUp = mD[i-1][j] -1;
+	        		mD[i][j] = Math.max(Math.max(scoreDiag, scoreLeft), scoreUp);
         		} else {
         			mD[i][j] = Integer.MIN_VALUE;
         		}
@@ -284,6 +287,9 @@ public class Realigner {
     	   }
        	}
         mScore = mD[i][j];
+        if (mScore == Integer.MIN_VALUE){
+        	mScore = 0;
+        }
         while (i > 0 && j > 0) {     
         	int weight = -1;
         	if (mSeqB.symbols.get(j - 1).symbols.contains(mSeqA.sequence.get(i - 1))) {
@@ -326,10 +332,10 @@ public class Realigner {
     			j--;
     			continue;
         	} else {
-    			mAlignmentSeqA += mSeqA.sequence.get(i-1);
-    			Metasymbol sym = new Metasymbol();
-    			sym.symbols.add('-');
-    			mAlignmentSeqB += '-';
+//    			mAlignmentSeqA += mSeqA.sequence.get(i-1);
+//    			Metasymbol sym = new Metasymbol();
+//    			sym.symbols.add('-');
+//    			mAlignmentSeqB += '-';
     			
     			i--;
                 continue;
@@ -342,7 +348,6 @@ public class Realigner {
 //        System.out.println("Score: " + mScore);
 //        System.out.println("Sequence A: " + mAlignmentSeqA);
 //        System.out.println("Sequence B: " + mAlignmentSeqB);
-//        System.out.println(j);
 //        
         seqA.length =  mAlignmentSeqA.length();
         seqA.offset = seqA.offset + j - e;
@@ -351,7 +356,7 @@ public class Realigner {
 		for (int k = 0; k < seqArray.length; k++) {
 			seqA.sequence.add(seqArray[k]);
 		}
-       // mSeqA = new Read(seqA.readIndex, seqA.startIndex , mAlignmentSeqA.length(), seqA.offset + j - e, mAlignmentSeqA);
+  
         return Math.abs(mScore);
 	}
 	
@@ -360,36 +365,44 @@ public class Realigner {
 		Consensus consensus = getConsensus(layoutMap);
 		double initialScore = consensus.consensusScore;
 		boolean shouldContinue = true;
-		int iteration = 0;
+		int iteration = 1;
 		int length = layoutMap.keySet().size();
 		ArrayList<Integer> keys = new ArrayList<Integer>();
 		for (Integer i : layoutMap.keySet()) {
 			keys.add(i);
 		}
-	
+		double minimalScore = initialScore;
+		Consensus bestConsensus = consensus;
 		while(shouldContinue) {
 			double score = initialScore;
+			
 			for (int k = 0; k < length; k++) {
 				Read sequence = layoutMap.detachFromAlignmentOnIndex(keys.get(k));
 				dashFunction(sequence);
 				dashFunction(consensus);
-				double deltaConsensusScore =  globalAlignment(sequence, consensus, sequence.length * 0.1  );
+				double deltaConsensusScore =  getAlignment(sequence, consensus, sequence.length * epsilonPrecision );
+				//double scsore = getConsensusScoreWeighted(sequence, consensus, layoutMap);
 				consensus = getConsensus(layoutMap);	
+				score = consensus.consensusScore + 0.5*deltaConsensusScore + 0.5*getConsensusScoreWithFunction2(sequence, layoutMap);
+				
 				layoutMap.insertSequenceIntoAlignment(sequence);
-				//consensus = getConsensus(layoutMap);	
-				score = consensus.consensusScore + deltaConsensusScore;
+				if (score < minimalScore) {
+					bestConsensus = getConsensus(layoutMap);	
+					minimalScore = score;
+				}
 				//System.out.println(k);
-				System.out.println(score );
+				System.out.println(score);
 			}
 			
 					
 			
-			if (score >= initialScore || iteration == 10) {
+			if (score >= initialScore || iteration ==10) {
 				shouldContinue = false;
-				consensus = getConsensus(layoutMap);
-				consensus.printToConsensusToFile("consensus.txt");
+				
+				Writer.printUngappedConsensusToFile("consensus2.txt",bestConsensus);
 			}
-			System.out.println(score +" "+initialScore );
+			
+			System.out.println("After "+iteration+" iterations score is: "+ score +"   previous score : "+initialScore );
 			initialScore = score;
 			iteration++;
 		}

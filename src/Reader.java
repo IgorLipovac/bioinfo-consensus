@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,15 +49,24 @@ public class Reader {
 	}
 
 	
-	public static Alignment GetLayout(String layoutPath)
+	public static List<Alignment> GetLayout(String layoutPath)
 	{
-		Map<Integer, Read> layouts = new HashMap<Integer, Read>();
+		List <Alignment> layoutList = new LinkedList<Alignment>();
 		BufferedReader br = null;
 		try{
 			String sCurrentLine;			
 			br = new BufferedReader(new FileReader(layoutPath));
+			Map<Integer, Read> layouts = new HashMap<Integer, Read>();
 			while((sCurrentLine=br.readLine())!=null)
 			{
+				if (sCurrentLine.contains("LAY")) {
+					if (!layouts.isEmpty()) {
+						Alignment lays = new Alignment(layouts);
+						layoutList.add(lays);
+						layouts = new HashMap<Integer, Read>();
+					}
+					
+				} else 
 				if(sCurrentLine.contains("TLE"))
 				{
 					sCurrentLine = br.readLine();
@@ -84,13 +94,18 @@ public class Reader {
 				}
 				
 			}
+			if (!layouts.isEmpty()) {
+				Alignment lays = new Alignment(layouts);
+				layoutList.add(lays);
+				layouts = new HashMap<Integer, Read>();
+			}
 			br.close();
 		}
 		catch(Exception e)
 		{
 			System.out.print(e.getMessage());
 		}
-		Alignment lays = new Alignment(layouts);
-		return lays;
+		
+		return layoutList;
 	}
 }

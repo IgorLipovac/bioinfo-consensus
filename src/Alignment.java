@@ -29,12 +29,27 @@ public class Alignment {
 	public Read detachFromAlignmentOnIndex(Integer index) {
 		Read detached = this.layoutMap.get(index);
 		this.layoutMap.remove(index);
+		resetOffsets();
 		return detached;
 	}
 	
 	public void insertSequenceIntoAlignment(Read sequence) {
 		this.layoutMap.put(sequence.readIndex, sequence);
+		resetOffsets();
 	}
 	
-	
+	private void resetOffsets () {
+		int minOffset = 0;
+		for (Read read : layoutMap.values()) {
+			if (read.offset < minOffset) {
+				minOffset = read.offset;
+			}
+		}
+		if (minOffset != 0) {
+			for (Read read : layoutMap.values()) {
+				read.offset -=minOffset;
+			}
+		}
+		
+	}
 }

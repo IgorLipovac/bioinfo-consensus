@@ -33,9 +33,9 @@ public class main {
 		Reader.setReadsFilePath(args[0]);
 		List<Alignment> test = Reader.GetLayout( args[1]);
 		
-		
+		// arguments if not provided
 		double epsilon = 0.1;
-		int iterationNumber = 10;
+		int iterationNumber = 15;
 	    
 
 	    for (int i = 2;  i < args.length; i++) {

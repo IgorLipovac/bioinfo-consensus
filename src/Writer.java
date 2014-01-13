@@ -56,34 +56,40 @@ public class Writer {
 						if (index == 0) {
 							builder.append(consensus.symbols.get(i).symbols.get(1));
 							builder2.append(consensus.symbols.get(i).symbols.get(1));
-							writtenInto2++;
+							
 						} else {
 							builder.append(consensus.symbols.get(i).symbols.get(0));
 							builder2.append(consensus.symbols.get(i).symbols.get(0));
-							writtenInto2++;
+							
 						}
 					} else {
 						builder.append('n');
 						builder2.append("[");
 						writtenInto2++;
+						if (writtenInto2 % 60 == 0 && writtenInto2!=0) {
+							builder2.append('\n');
+						}
 						for (char c : consensus.symbols.get(i).symbols) {
 							builder2.append(c);
 							writtenInto2++;
+							if (writtenInto2 % 60 == 0 && writtenInto2!=0) {
+								builder2.append('\n');
+							}
 						}
 						builder2.append("]");
-						writtenInto2++;
 					}
 					
 				} else {
 					builder.append(consensus.symbols.get(i).symbols.get(0));
 					builder2.append(consensus.symbols.get(i).symbols.get(0));
-					writtenInto2++;
+					
 				}
 				written++;
 				if (written % 60 == 0 && written!=0) {
 					builder.append('\n');
 					
 				}
+				writtenInto2++;
 				if (writtenInto2 % 60 == 0 && writtenInto2!=0) {
 					builder2.append('\n');
 					

@@ -20,7 +20,7 @@ For some testing purposes we used scripts from: https://github.com/vzupanovic/sk
 
 More about the algorithm, results and program itself - see documentation (coming soon)!
 
-And also - please support:
+And also - please support our friends:
 https://www.facebook.com/24hprojectchallenge
 
 

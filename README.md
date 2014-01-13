@@ -24,11 +24,11 @@ First parameter is always a path to file containing FASTA format reads and secon
 
 ###**Optional:**
 
- - **-e** parameter stands for epsilon - expected average layout error
+ - **-e** parameter stands for epsilon - expected average layout error, we recommend epsilon of 0.05-0.1
  
- - **-i** stands for maximum iteration number - we recommend epsilon of 0.05-0.1 and max iteration of 10-15 for test examples given. 
+ - **-i** stands for maximum iteration number - we recommend max iteration of 10-15 for smaller test examples given
  
- - for further explanation please see referenced paper
+ - for further explanation please see referenced paper<br/>
  
 -----------------------------------
  

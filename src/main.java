@@ -9,7 +9,8 @@ public class main {
 		Reader.setReadsFilePath(args[0]);
 		List<Alignment> test = Reader.GetLayout( args[1]);
 		//Realigner.getConsensus(test);
-		Realigner.reAlign(test.get(0), 0.05);
+		Consensus cons = Realigner.reAlign(test.get(0), 0.1);
+		Writer.printUngappedConsensusToFile("consensus123.txt",cons);
 	}
 
 }

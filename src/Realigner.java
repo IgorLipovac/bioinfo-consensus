@@ -209,7 +209,7 @@ public class Realigner {
         int[][] mD;
         int mScore;
         String mAlignmentSeqA = "";
-        String mAlignmentSeqB = "";
+       // String mAlignmentSeqB = "";
         
         int e = (int) (eps/2);
         int start = mSeqA.offset - e;
@@ -300,18 +300,9 @@ public class Realigner {
             	
         	if (mD[i][j] == mD[i-1][j-1] + weight) {                      
         		mAlignmentSeqA += mSeqA.sequence.get(i-1);
-        		Metasymbol sym =  mSeqB.symbols.get(j-1);
-        		
-        		mAlignmentSeqB += sym.symbols.get(0);
-//        		if (sym.symbols.size() > 1) { 
-//        			mAlignmentSeqB +=')';
-//        			}
-//        		for (Character c : sym.symbols) {
-//        			mAlignmentSeqB += c;
-//        			}
-//        		if (sym.symbols.size() > 1) { 
-//        			mAlignmentSeqB +='(';
-//        			}
+        		//Metasymbol sym =  mSeqB.symbols.get(j-1);
+        		//mAlignmentSeqB += sym.symbols.get(0);
+
         		i--;
         		j--;    
         		continue;
@@ -319,31 +310,19 @@ public class Realigner {
     			mAlignmentSeqA += "-";
     			Metasymbol sym =  mSeqB.symbols.get(j-1);
         		
-        		mAlignmentSeqB += sym.symbols.get(0);
-//        		if (sym.symbols.size() > 1) { 
-//        			mAlignmentSeqB +=')';
-//        			}
-//        		for (Character c : sym.symbols) {
-//        			mAlignmentSeqB += c;
-//        			}
-//        		if (sym.symbols.size() > 1) { 
-//        			mAlignmentSeqB +='(';
-//        			}
+        		//mAlignmentSeqB += sym.symbols.get(0);
+
     			j--;
     			continue;
         	} else {
-//    			mAlignmentSeqA += mSeqA.sequence.get(i-1);
-//    			Metasymbol sym = new Metasymbol();
-//    			sym.symbols.add('-');
-//    			mAlignmentSeqB += '-';
-    			
+        		//mAlignmentSeqA += mSeqA.sequence.get(i-1);
     			i--;
                 continue;
             }
         }
 //             
         mAlignmentSeqA = new StringBuffer(mAlignmentSeqA).reverse().toString();
-        mAlignmentSeqB = new StringBuffer(mAlignmentSeqB).reverse().toString();
+       // mAlignmentSeqB = new StringBuffer(mAlignmentSeqB).reverse().toString();
         
 //        System.out.println("Score: " + mScore);
 //        System.out.println("Sequence A: " + mAlignmentSeqA);
@@ -361,7 +340,7 @@ public class Realigner {
 	}
 	
 	
-	public static void reAlign(Alignment layoutMap, double epsilonPrecision) {
+	public static Consensus reAlign(Alignment layoutMap, double epsilonPrecision) {
 		Consensus consensus = getConsensus(layoutMap);
 		double initialScore = consensus.consensusScore;
 		boolean shouldContinue = true;
@@ -381,7 +360,7 @@ public class Realigner {
 				dashFunction(sequence);
 				dashFunction(consensus);
 				double deltaConsensusScore =  getAlignment(sequence, consensus, sequence.length * epsilonPrecision );
-				//double scsore = getConsensusScoreWeighted(sequence, consensus, layoutMap);
+				
 				consensus = getConsensus(layoutMap);	
 				score = consensus.consensusScore + 0.5*deltaConsensusScore + 0.5*getConsensusScoreWithFunction2(sequence, layoutMap);
 				
@@ -399,13 +378,15 @@ public class Realigner {
 			if (score >= initialScore || iteration ==10) {
 				shouldContinue = false;
 				
-				Writer.printUngappedConsensusToFile("consensus2.txt",bestConsensus);
+				
 			}
 			
 			System.out.println("After "+iteration+" iterations score is: "+ score +"   previous score : "+initialScore );
 			initialScore = score;
 			iteration++;
 		}
+		
+		return bestConsensus;
 		
 	}
 

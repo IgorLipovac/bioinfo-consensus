@@ -10,6 +10,7 @@ public class Read {
 	public int startIndex;
 	public int endIndex;
 	public int length;
+	public int layoutOffset;
 	public ArrayList<Character> sequence;
 	
 	// Initializing constructor
@@ -18,14 +19,16 @@ public class Read {
 		this.offset = offset2;
 		this.startIndex = startInd;
 		this.endIndex = endInd;
+		this.layoutOffset = offset2;
 		this.length = Math.abs(endInd - startInd);
 		this.sequence = (ArrayList<Character>) Reader.GetReadFromFasta(index);
 	}
 	
 	// usual
-	public Read(int index, int startInd, int endInd, int offset2, String seq) {
+	public Read(int index, int startInd, int endInd, int offset2, int layoutOffset, String seq) {
 		this.readIndex = index;
 		this.offset = offset2;
+		this.layoutOffset = layoutOffset;
 		this.startIndex = startInd;
 		this.endIndex = endInd;
 		this.length = Math.abs(endInd - startInd);

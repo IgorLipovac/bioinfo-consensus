@@ -26,7 +26,7 @@ public class Reader {
 			int currentLine=0;
 			while(currentLine!=(index-1)*2)
 			{
-				br.readLine();
+				String line = br.readLine();
 				currentLine++;
 			}
 			br.readLine();
@@ -53,6 +53,7 @@ public class Reader {
 	{
 		List <Alignment> layoutList = new LinkedList<Alignment>();
 		BufferedReader br = null;
+		
 		try{
 			String sCurrentLine;			
 			br = new BufferedReader(new FileReader(layoutPath));

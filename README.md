@@ -4,8 +4,8 @@ bioinfo-consensus > ReAligner
 This program is created as a project assignment for Bioinformatics class (Faculty of Electrical Engineering and Computing, University of Zagreb).
 It implements iterative realigning algorithm described in:
 
-**ReAligner: a program for refining DNA sequence multi-alignments.**<br/>
-Anson EL, Myers EW.[link](http://online.liebertpub.com/doi/abs/10.1089/cmb.1997.4.369).
+**ReAligner: a program for refining DNA sequence multi-alignments.**  [link](http://online.liebertpub.com/doi/abs/10.1089/cmb.1997.4.369)<br/>
+*Anson EL, Myers EW.*
 
 
 Run instructions
@@ -13,9 +13,9 @@ Run instructions
 
 Program requires Java installed.<br/>
 Program usage - just call jar executable from terminal. <br/> 
-Simple example:
+Simple working example:
 ```shell
-*java -jar realigner.jar test_2/readsInput2.fasta test_2/layouts2.afg -e(some_double_value) -l(some_integer_value)*
+java -jar realigner.jar test_2/readsInput2.fasta test_2/layouts2.afg -e0.1 -l10
 ```
 
 ###**Required parameters:**

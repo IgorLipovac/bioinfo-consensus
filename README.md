@@ -14,6 +14,7 @@ Program usage example:
 where -e parameter stands for epsilon - expected average layout error; and -i stands for maximum iteration number - we recommend epsilon of 0.1 and max iteration of 10 for test examples given.
 
 For some testing purposes we used scripts from: https://github.com/vzupanovic/skripte
+
 More about the algorithm, results and program itself - see documentation!
 
 And also - please support:

@@ -11,7 +11,7 @@ Program usage example:
 
 *java -jar realigner.jar test_2/readsInput2.fasta test_2/layouts2.afg -e(some_double_value) -l(some_integer_value)*
 
-where -e parameter stands for epsilon - expected average layout error; and -i stands for maximum iteration number - we recommend epsilon of 0.1 and max iteration of 10 for test examples given.
+where -e parameter stands for epsilon - expected average layout error; and -i stands for maximum iteration number - we recommend epsilon of 0.05-0.1 and max iteration of 10-15 for test examples given.
 
 For some testing purposes we used scripts from: https://github.com/vzupanovic/skripte
 

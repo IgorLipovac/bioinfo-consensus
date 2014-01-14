@@ -5,33 +5,33 @@ import java.util.Arrays;
 
 public class Read {
 	
-	public int readIndex;
-	public int offset;
-	public int startIndex;
-	public int endIndex;
-	public int length;
-	public int layoutOffset;
+	private int id;
+	private int offset;
+	private int startIndex;
+	private int endIndex;
+	private int length;
+	private int layoutOffset;
 	public ArrayList<Character> sequence;
 	
 	// Initializing constructor
-	public Read(int index, int startInd, int endInd, int offset2) {
-		this.readIndex = index;
-		this.offset = offset2;
-		this.startIndex = startInd;
-		this.endIndex = endInd;
-		this.layoutOffset = offset2;
-		this.length = Math.abs(endInd - startInd);
-		this.sequence = (ArrayList<Character>) Reader.GetReadFromFasta(index);
+	public Read(int index, int startInd, int endInd, int offset2, ArrayList<Character> seq) {
+		this.setId(index);
+		this.setOffset(offset2);
+		this.setStartIndex(startInd);
+		this.setEndIndex(endInd);
+		this.setLayoutOffset(offset2);
+		this.setLength(Math.abs(endInd - startInd));
+		this.sequence = seq;
 	}
 	
 	// usual
 	public Read(int index, int startInd, int endInd, int offset2, int layoutOffset, String seq) {
-		this.readIndex = index;
-		this.offset = offset2;
-		this.layoutOffset = layoutOffset;
-		this.startIndex = startInd;
-		this.endIndex = endInd;
-		this.length = Math.abs(endInd - startInd);
+		this.setId(index);
+		this.setOffset(offset2);
+		this.setLayoutOffset(layoutOffset);
+		this.setStartIndex(startInd);
+		this.setEndIndex(endInd);
+		this.setLength(Math.abs(endInd - startInd));
 		char[] seqArray = seq.toCharArray();
 		this.sequence = new ArrayList<Character>();
 		for (int i = 0; i < seqArray.length; i++) {
@@ -39,9 +39,57 @@ public class Read {
 		}
 	}
 	
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+
+	public int getStartIndex() {
+		return startIndex;
+	}
+
+	public void setStartIndex(int startIndex) {
+		this.startIndex = startIndex;
+	}
+
+	public int getEndIndex() {
+		return endIndex;
+	}
+
+	public void setEndIndex(int endIndex) {
+		this.endIndex = endIndex;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
+	}
+
+	public int getLayoutOffset() {
+		return layoutOffset;
+	}
+
+	public void setLayoutOffset(int layoutOffset) {
+		this.layoutOffset = layoutOffset;
+	}
+	
 	public void insertGapAt(int index) {
-		this.endIndex++;
-		this.length++;
+		this.setEndIndex(this.getEndIndex() + 1);
+		this.setLength(this.getLength() + 1);
 		this.sequence.add(index, '-');
 	}
 		

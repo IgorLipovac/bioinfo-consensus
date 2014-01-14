@@ -8,30 +8,29 @@ public class Realigner {
 	
 	public static Consensus getConsensus (Alignment layoutMap) {
 		int numOfCols = getNumberOfColumns(layoutMap);
-		
-		Consensus consensus = new Consensus();
+		Consensus consensus = new Consensus(layoutMap.getLayoutID());
 		double f1score = 0.0;
 		double f2score = 0.0;
 		for (int col = 0; col < numOfCols; col++) {	
 			char[] column = getColumn(layoutMap,col);
 			Metasymbol consensusSymbol = getConsensusMetasymbol(column);
-			consensus.symbols.add(consensusSymbol);
+			consensus.getSymbols().add(consensusSymbol);
 			f1score += getColumnScore(column, consensusSymbol);
 			if (column.length > 0) {
 				f2score += getColumnScore(column, consensusSymbol) / column.length;
 			}
 		}
-		consensus.consensusScore = 0.5 * f1score + 0.5 * f2score;
+		consensus.setConsensusScore(0.5 * f1score + 0.5 * f2score);
 		return consensus;
 	}
 	
 	private static void scoreConsensus (Consensus consensus, Alignment layoutMap) {
-		consensus.consensusScore = 0.f;
+		consensus.setConsensusScore(0.f);
 		int numOfCols = getNumberOfColumns(layoutMap);
 
 		for (int col = 0; col < numOfCols; col++) {	
 			char[] column = getColumn(layoutMap,col);
-			consensus.consensusScore += getColumnScore(column, consensus.symbols.get(col));
+			consensus.setConsensusScore(consensus.getConsensusScore() + getColumnScore(column, consensus.getSymbols().get(col)));
 		}
 	}
 	
@@ -75,10 +74,10 @@ public class Realigner {
 	private static double getConsensusScoreWithFunction1(Read sequence, Consensus consensus) {
 		double score = 0;
 		// takes into account that S + c(endgap) scores 0;
-		for (int col = sequence.offset; col < sequence.offset + sequence.length; col++) {
-			if (col >= 0 && col < consensus.symbols.size()) {
-				Metasymbol sym = consensus.symbols.get(col);
-				char c = sequence.sequence.get(col-sequence.offset);
+		for (int col = sequence.getOffset(); col < sequence.getOffset() + sequence.getLength(); col++) {
+			if (col >= 0 && col < consensus.getSymbols().size()) {
+				Metasymbol sym = consensus.getSymbols().get(col);
+				char c = sequence.sequence.get(col-sequence.getOffset());
 				if (!sym.symbols.contains(c)) {
 					score+=1;
 				}
@@ -93,9 +92,9 @@ public class Realigner {
 	private static double getConsensusScoreWithFunction2(Read sequence, Alignment layoutMap) {
 		double score = 0;
 		// takes into account that S + c(endgap) scores 0;
-		for (int col = sequence.offset; col < sequence.offset + sequence.length; col++) {
+		for (int col = sequence.getOffset(); col < sequence.getOffset() + sequence.getLength(); col++) {
 			char[] column = getColumn(layoutMap, col);
-			char c = sequence.sequence.get(col - sequence.offset);
+			char c = sequence.sequence.get(col - sequence.getOffset());
 			double columnScore = 0;
 			if (column.length > 0) {
 				columnScore = getColumnScore(column, c) / column.length;
@@ -109,7 +108,7 @@ public class Realigner {
 	private static char[] getColumn (Alignment layoutMap, int index) {
 		List<Read> reads = new ArrayList<Read>();
 		for (Read lay : layoutMap.values()) {
-			if (lay.offset <= index && index < lay.offset + lay.length) {
+			if (lay.getOffset() <= index && index < lay.getOffset() + lay.getLength()) {
 				reads.add(lay);
 			}
 		}
@@ -117,7 +116,7 @@ public class Realigner {
 		char[] column = new char[reads.size()];
 		for (int i = 0; i < reads.size(); i++) {
 			Read read = reads.get(i);
-			char c = read.sequence.get(index - read.offset);		
+			char c = read.sequence.get(index - read.getOffset());		
 			column[i] = c;
 		}
 		return column;
@@ -151,12 +150,12 @@ public class Realigner {
 		for(int key : keys) {
 			Read current = layoutMap.get(key);
 			int minusOffset = columnsNum;
-			if (current.offset <= columnsNum) {
-				minusOffset = current.offset;
+			if (current.getOffset() <= columnsNum) {
+				minusOffset = current.getOffset();
 			} else {
-				minusOffset += (current.offset - columnsNum);
+				minusOffset += (current.getOffset() - columnsNum);
 			}
-			int newLength = minusOffset + current.length;
+			int newLength = minusOffset + current.getLength();
 			if (newLength > columnsNum) {
 				columnsNum = newLength;
 			}
@@ -169,15 +168,15 @@ public class Realigner {
 	// removes dashes if needed
 	private static void dashFunction(Consensus consensus) {
 		List <Integer> indexesToRemove = new ArrayList<Integer>();
-		for (int col = 0; col < consensus.symbols.size(); col++) {
-			Metasymbol symbol = consensus.symbols.get(col);
+		for (int col = 0; col < consensus.getSymbols().size(); col++) {
+			Metasymbol symbol = consensus.getSymbols().get(col);
 			if (symbol.symbols.contains('-') && symbol.symbols.size() == 1) {
 				indexesToRemove.add(col);
 			}
 		}
 		
 		for (int i = 0; i < indexesToRemove.size(); i++) {
-			consensus.symbols.remove(indexesToRemove.get(i));
+			consensus.getSymbols().remove(indexesToRemove.get(i));
 		}
 	}
 	
@@ -187,8 +186,8 @@ public class Realigner {
 		for (int col = 0; col < read.sequence.size(); col++) {
 			char symbol = read.sequence.get(col);
 			if (symbol == '-') {
-				read.length--;
-				read.endIndex--;
+				read.setLength(read.getLength() - 1);
+				read.setEndIndex(read.getEndIndex() - 1);
 				indexesToRemove.add(col);
 			}
 		}
@@ -201,141 +200,135 @@ public class Realigner {
 	
 	
 	private static double getAlignment(Read seqA, Consensus seqB, double eps) {
-		Read mSeqA = seqA;
-        Consensus mSeqB = new Consensus();
-        int[][] mD;
-        int mScore;
-        String mAlignmentSeqA = "";
+			
+	        Consensus mSeqB = new Consensus();
+	        int[][] mD;
+	        int mScore;
+	        String mAlignmentSeqA = "";
+	
+	        int e = (int) (eps/2);
+	        int start = seqA.getOffset() - e;
+	        
+	        int end = e + seqA.getOffset() + seqA.getLength();
+	        if (start < 0) {
+	        	start = 0;
+	        	end += e;
+	        }
+	        if (end >= seqB.getSymbols().size()) {
+	        	end = seqB.getSymbols().size()-1;
+	        }
+	
+	        for (int i = start; i < end;i++){
+	        	mSeqB.getSymbols().add(seqB.getSymbols().get(i));
+	        }
+	                      
+	        mD = new int[seqA.getLength() + 1][mSeqB.getSymbols().size() + 1];
+	        
+	        
+	        for (int i = 0; i <= seqA.getLength(); i++) {
+	        	for (int j = 0; j <= mSeqB.getSymbols().size(); j++) {
+	        		if (i == 0) {
+	        			if (j <= 2*e) {
+	        				mD[i][j] = -Math.abs(j - e);
+	        			}
+	        			else {
+	        				mD[i][j] = Integer.MIN_VALUE;
+	        			}
+	        		} else if (i <= e) {
+	        			if (j <= e)  {
+	        				if (j >= i) {
+	        					mD[i][j] = j - i - e;
+	        				} else {
+	        					mD[i][j] = Integer.MIN_VALUE;
+	        				}
+	        			}
+	        		}
+	
+	        	}
+	        }
+	        
+	        for (int i = 1; i <= seqA.getLength(); i++) {
+	        	for (int j = 1; j <= mSeqB.getSymbols().size(); j++) {
+	        		if (j >= i && j <= i + 2*e) {
+		        		int weight = -1;
+		        		if (mSeqB.getSymbols().get(j-1).symbols.contains(seqA.sequence.get(i - 1))) {
+		        			weight = 0;
+		    			} else {
+		    				weight = -1;
+		    			}
+		        		
+		        		int scoreDiag = mD[i-1][j-1] + weight;
+		        		int scoreLeft = mD[i][j-1];
+		        		if (scoreLeft != Integer.MIN_VALUE) 
+		        			scoreLeft = mD[i][j-1] - 1;
+//		        		int scoreUp =mD[i-1][j];
+//		        		if (scoreUp != Integer.MIN_VALUE) 
+//		        			scoreUp = mD[i-1][j] -1;
+		        		mD[i][j] = Math.max(scoreDiag, scoreLeft);//, scoreUp);
+	        		} else {
+	        			mD[i][j] = Integer.MIN_VALUE;
+	        		}
+	        	}
+	        }
+	
+	        
+	        int i = seqA.getLength();
+	        int j = mSeqB.getSymbols().size();
+	       	int maxVal = Integer.MIN_VALUE;
+	       	for (int index = mSeqB.getSymbols().size(); (index > mSeqB.getSymbols().size() - 2*e) && (index > 1) ; index --) {
+	    	   if (mD[i][index] > maxVal ) {
+	    		   maxVal = mD[i][index];
+	    		   j = index;
+	    	   }
+	       	}
+	        mScore = mD[i][j];
+	        if (mScore == Integer.MIN_VALUE){
+	        	mScore = 0;
+	        }
+	        while (i > 0 && j > 0) {     
+	        	int weight = -1;
+	        	if (mSeqB.getSymbols().get(j - 1).symbols.contains(seqA.sequence.get(i - 1))) {
+	        		weight = 0;
+	        	} else {
+	        		weight = -1;
+	        	}
+	        	if (mD[i][j] == mD[i-1][j-1] + weight) {                      
+	        		mAlignmentSeqA += seqA.sequence.get(i-1);
+	        		i--;
+	        		j--;    
+	        		continue;
+	        	} else if (mD[i][j] == mD[i][j-1] - 1) {
+	    			mAlignmentSeqA += "-";
+	    			Metasymbol sym =  mSeqB.getSymbols().get(j-1);
+	    			j--;
+	    			continue;
+	        	} else {
+	        	//	mAlignmentSeqA += seqA.sequence.get(i-1);
+	    			i--;
+	                continue;
+	            }
+	        }           
+	        mAlignmentSeqA = new StringBuffer(mAlignmentSeqA).reverse().toString();
 
-        int e = (int) (eps/2);
-        int start = mSeqA.offset - e;
-        
-        int end = e + mSeqA.offset + mSeqA.length;
-        if (start < 0) {
-        	start = 0;
-        	end += e;
-        }
-        if (end >= seqB.symbols.size()) {
-        	end = seqB.symbols.size()-1;
-        }
-
-        for (int i = start; i < end;i++){
-        	mSeqB.symbols.add(seqB.symbols.get(i));
-        }
-                      
-        mD = new int[mSeqA.length + 1][mSeqB.symbols.size() + 1];
-        
-        
-        for (int i = 0; i <= mSeqA.length; i++) {
-        	for (int j = 0; j <= mSeqB.symbols.size(); j++) {
-        		if (i == 0) {
-        			if (j <= 2*e) {
-        				mD[i][j] = 0;//-Math.abs(j - e);
-        			}
-        			else {
-        				mD[i][j] = Integer.MIN_VALUE;
-        			}
-        		} else if (i <= e) {
-        			if (j <= e)  {
-        				if (j >= i) {
-        					mD[i][j] = j - i - e;
-        				} else {
-        					mD[i][j] = Integer.MIN_VALUE;
-        				}
-        			}
-        		}
-
-        	}
-        }
-        
-        for (int i = 1; i <= mSeqA.length; i++) {
-        	for (int j = 1; j <= mSeqB.symbols.size(); j++) {
-        		if (j >= i && j <= i + 2*e) {
-	        		int weight = -1;
-	        		if (mSeqB.symbols.get(j-1).symbols.contains(mSeqA.sequence.get(i - 1))) {
-	        			weight = 0;
-	    			} else {
-	    				weight = -1;
-	    			}
-	        		
-	        		int scoreDiag = mD[i-1][j-1] + weight;
-	        		int scoreLeft = mD[i][j-1];
-	        		if (scoreLeft != Integer.MIN_VALUE) 
-	        			scoreLeft = mD[i][j-1] - 1;
-	        		int scoreUp =Integer.MIN_VALUE;
-	        		if (scoreUp != Integer.MIN_VALUE) 
-	        			scoreUp = mD[i-1][j] -1;
-	        		mD[i][j] = Math.max(Math.max(scoreDiag, scoreLeft), scoreUp);
-        		} else {
-        			mD[i][j] = Integer.MIN_VALUE;
-        		}
-        	}
-        }
-
-        
-        int i = mSeqA.length;
-        int j = mSeqB.symbols.size();
-       	int maxVal = Integer.MIN_VALUE;
-       	for (int index = mSeqB.symbols.size(); (index > mSeqB.symbols.size() - 2*e) && (index > 1) ; index --) {
-    	   if (mD[i][index] > maxVal ) {
-    		   maxVal = mD[i][index];
-    		   j = index;
-    	   }
-       	}
-        mScore = mD[i][j];
-        if (mScore == Integer.MIN_VALUE){
-        	mScore = 0;
-        }
-        while (i > 0 && j > 0) {     
-        	int weight = -1;
-        	if (mSeqB.symbols.get(j - 1).symbols.contains(mSeqA.sequence.get(i - 1))) {
-        		weight = 0;
-        	} else {
-        		weight = -1;
-        	}
-            	
-        	if (mD[i][j] == mD[i-1][j-1] + weight) {                      
-        		mAlignmentSeqA += mSeqA.sequence.get(i-1);
-        		i--;
-        		j--;    
-        		continue;
-        	} else if (mD[i][j] == mD[i][j-1] - 1) {
-    			mAlignmentSeqA += "-";
-    			Metasymbol sym =  mSeqB.symbols.get(j-1);
-        		
-        		//mAlignmentSeqB += sym.symbols.get(0);
-
-    			j--;
-    			continue;
-        	} else {
-        		//mAlignmentSeqA += mSeqA.sequence.get(i-1);
-    			i--;
-                continue;
-            }
-        }
-//             
-        mAlignmentSeqA = new StringBuffer(mAlignmentSeqA).reverse().toString();
-       // mAlignmentSeqB = new StringBuffer(mAlignmentSeqB).reverse().toString();
-        
-//        System.out.println("Score: " + mScore);
-//        System.out.println("Sequence A: " + mAlignmentSeqA);
-//        System.out.println("Sequence B: " + mAlignmentSeqB);
-//        
-        seqA.length =  mAlignmentSeqA.length();
-        seqA.offset = seqA.offset + j - e;
-		char[] seqArray =  mAlignmentSeqA.toCharArray();
-		seqA.sequence = new ArrayList<Character>();
-		for (int k = 0; k < seqArray.length; k++) {
-			seqA.sequence.add(seqArray[k]);
-		}
-  
-        return Math.abs(mScore);
+	//        System.out.println("Score: " + mScore);
+	//        System.out.println("Sequence A: " + mAlignmentSeqA);
+	//        System.out.println("Sequence B: " + mAlignmentSeqB);
+	//        
+	        seqA.setLength(mAlignmentSeqA.length());
+	        seqA.setOffset(seqA.getOffset() + j - e);
+			char[] seqArray =  mAlignmentSeqA.toCharArray();
+			seqA.sequence = new ArrayList<Character>();
+			for (int k = 0; k < seqArray.length; k++) {
+				seqA.sequence.add(seqArray[k]);
+			}
+	  
+	        return Math.abs(mScore);
 	}
 	
 	
 	public static Consensus reAlign(Alignment layoutMap, double epsilonPrecision, int numOfIterations) {
 		Consensus consensus = getConsensus(layoutMap);
-		double initialScore = consensus.consensusScore;
+		double initialScore = consensus.getConsensusScore();
 		boolean shouldContinue = true;
 		int iteration = 1;
 		int length = layoutMap.keySet().size();
@@ -345,6 +338,7 @@ public class Realigner {
 		}
 		double minimalScore = initialScore;
 		Consensus bestConsensus = consensus;
+		
 		while(shouldContinue) {
 			System.out.println("Iterating...");
 
@@ -354,27 +348,26 @@ public class Realigner {
 				dashFunction(consensus);
 				consensus = getConsensus(layoutMap);
 				//double deltaConsensusScore =  
-				getAlignment(sequence, consensus, sequence.length* epsilonPrecision);
-				
-				
+				getAlignment(sequence, consensus, sequence.getLength()* epsilonPrecision);
+
 				//score = consensus.consensusScore + deltaConsensusScore + 0.5*getConsensusScoreWithFunction2(sequence, layoutMap);
 				
 				layoutMap.insertSequenceIntoAlignment(sequence);
 				consensus = getConsensus(layoutMap);	
-				if (consensus.consensusScore < minimalScore) {
+				if (consensus.getConsensusScore() < minimalScore) {
 					bestConsensus = consensus;	
-					minimalScore = consensus.consensusScore;
+					minimalScore = consensus.getConsensusScore();
 				}
 				//System.out.println(k);
 				//System.out.println(bestConsensus.consensusScore);
 			}
 
-			if (bestConsensus.consensusScore >= initialScore || iteration == numOfIterations) {
+			if (bestConsensus.getConsensusScore() >= initialScore || iteration == numOfIterations) {
 				shouldContinue = false;				
 			}
 			
-			System.out.println("After "+iteration+" iterations score is: "+ bestConsensus.consensusScore +"   previous score : "+initialScore );
-			initialScore = bestConsensus.consensusScore;
+			System.out.println("After "+iteration+" iterations score is: "+ bestConsensus.getConsensusScore() +"   previous score : "+initialScore );
+			initialScore = bestConsensus.getConsensusScore();
 			iteration++;
 		}
 		

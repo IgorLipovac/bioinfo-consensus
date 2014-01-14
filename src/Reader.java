@@ -10,12 +10,12 @@ import java.util.Map;
 
 public class Reader {
 	
-	public static String readsFilePath;
+	private static String readsFilePath;
 	
 	public static void setReadsFilePath (String path) {
 		readsFilePath = path;
 	}
-	
+	// should be refactored due to Fasta format specifics!
 	public static List<Character> GetReadFromFasta(int index)
 	{
 		String sequence = null;
@@ -58,18 +58,19 @@ public class Reader {
 			String sCurrentLine;			
 			br = new BufferedReader(new FileReader(layoutPath));
 			Map<Integer, Read> layouts = new HashMap<Integer, Read>();
+			int laysID = 1;
 			while((sCurrentLine=br.readLine())!=null)
 			{
 				if (sCurrentLine.contains("LAY")) {
 					if (!layouts.isEmpty()) {
 						Alignment lays = new Alignment(layouts);
+						lays.setLayoutID(laysID);
+						laysID++;
 						layoutList.add(lays);
 						layouts = new HashMap<Integer, Read>();
 					}
 					
-				} else 
-				if(sCurrentLine.contains("TLE"))
-				{
+				} else if(sCurrentLine.contains("TLE")) {
 					sCurrentLine = br.readLine();
 					String[] splitted = sCurrentLine.split("[:,]");
 					int startInd = Integer.parseInt(splitted[1]);
@@ -86,17 +87,14 @@ public class Reader {
 					sCurrentLine = br.readLine();
 					splitted = sCurrentLine.split("[:]");
 					int index = Integer.parseInt(splitted[1]);
-					Read temp = new Read(index, startInd, endInd, offset);
+					ArrayList<Character> sequence = (ArrayList<Character>) GetReadFromFasta(index);
+					Read temp = new Read(index, startInd, endInd, offset, sequence);
 					layouts.put(Integer.parseInt(splitted[1]), temp);
-				}
-				else
-				{
-					continue;
-				}
-				
+				}				
 			}
 			if (!layouts.isEmpty()) {
 				Alignment lays = new Alignment(layouts);
+				lays.setLayoutID(laysID);
 				layoutList.add(lays);
 				layouts = new HashMap<Integer, Read>();
 			}

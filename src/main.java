@@ -34,7 +34,7 @@ public class main {
 		List<Alignment> test = Reader.GetLayout( args[1]);
 		
 		// arguments if not provided
-		double epsilon = 0.1;
+		double epsilon = 0.05;
 		int iterationNumber = 15;
 	    
 
@@ -65,13 +65,12 @@ public class main {
 		            break;
 	        }
 	    }
-	
+
 		//Realigner.getConsensus(test);
 		for (int contig = 0; contig < test.size(); contig++) {
 			System.out.println("<===============================================================>");
 			System.out.println("Realigning contig/layout with ID:" + contig);
 			Consensus cons = Realigner.reAlign(test.get(contig), epsilon, iterationNumber);
-			cons.layoutID = contig;
 			if (contig == 0) {
 				Writer.printUngappedConsensusToFile(cons,false);
 			}

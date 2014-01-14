@@ -7,7 +7,18 @@ import java.util.Set;
 public class Alignment {
 
 	private Map<Integer, Read> layoutMap;
+	private int layoutID;
 	
+	public int getLayoutID() {
+		return layoutID;
+	}
+
+
+	public void setLayoutID(int layoutID) {
+		this.layoutID = layoutID;
+	}
+
+
 	public Alignment(Map<Integer, Read> newLayoutMap) {
 		this.layoutMap = newLayoutMap;
 	}
@@ -34,20 +45,20 @@ public class Alignment {
 	}
 	
 	public void insertSequenceIntoAlignment(Read sequence) {
-		this.layoutMap.put(sequence.readIndex, sequence);
+		this.layoutMap.put(sequence.getId(), sequence);
 		resetOffsets();
 	}
 	
 	private void resetOffsets () {
 		int minOffset = 0;
 		for (Read read : layoutMap.values()) {
-			if (read.offset < minOffset) {
-				minOffset = read.offset;
+			if (read.getOffset() < minOffset) {
+				minOffset = read.getOffset();
 			}
 		}
 		if (minOffset != 0) {
 			for (Read read : layoutMap.values()) {
-				read.offset -=minOffset;
+				read.setOffset(read.getOffset() - minOffset);
 			}
 		}
 		

@@ -66,7 +66,7 @@ public class main {
 	        }
 	    }
 
-		//Realigner.getConsensus(test);
+		//ReAlign every contig
 		for (int contig = 0; contig < test.size(); contig++) {
 			System.out.println("<===============================================================>");
 			System.out.println("Realigning contig/layout with ID:" + contig);

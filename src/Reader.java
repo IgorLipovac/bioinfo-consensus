@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,24 +16,97 @@ public class Reader {
 	public static void setReadsFilePath (String path) {
 		readsFilePath = path;
 	}
-	// should be refactored due to Fasta format specifics!
-	public static List<Character> GetReadFromFasta(int index)
+
+	
+	
+	private static Read GetReadFromFasta(int index, int startInd, int endInd, int offset)
 	{
+		ArrayList<Character> qua = new ArrayList<Character>();
 		String sequence = null;
 		BufferedReader br = null;
 		try
 		{		
 			br = new BufferedReader(new FileReader(readsFilePath));
-			int currentLine=0;
-			while(currentLine!=(index-1)*2)
-			{
-				String line = br.readLine();
-				currentLine++;
-			}
-			br.readLine();
-			sequence = br.readLine();
-			br.close();
-			
+			String line = br.readLine();
+			if (line.startsWith(">")){
+				String[] splitt = line.split("_L");
+				if (splitt.length < 2){
+					int currentLine=0;
+					while(currentLine!=(index-1)*2)
+					{
+						br.readLine();
+						currentLine++;
+					}
+					sequence = br.readLine();
+					br.close();
+				}  else {
+					while(line != null){
+						String part = line.split("_L")[0];
+						String splitted = part.split("_",2)[1];
+						Long number = getNumber(splitted);
+						if (number == index) {
+							sequence = br.readLine();
+							br.close();
+							break;
+						}
+						br.readLine();
+						line = br.readLine();
+					}				
+				}			
+			} else if (line.startsWith("@")){
+				String[] splitt = line.split("_L");
+				if (splitt.length < 2){
+					int currentLine=0;
+					while(currentLine!=(index-1)*4)
+					{
+						br.readLine();
+						br.readLine();
+						br.readLine();
+						currentLine += 3;
+					}
+					sequence = br.readLine();
+					String plus = br.readLine();
+					if(!plus.startsWith("+")){
+						System.out.println("File isn't fastq");
+						System.exit(-1);
+					}
+					String qual = br.readLine();
+					char[] qualArray = qual.toCharArray();
+					for (char c : qualArray){
+						qua.add(c);
+					}
+					br.close();
+				} else {
+					while(line != null){
+						String part = line.split("_L")[0];
+						String splitted = part.split("_",2)[1];
+						Long number = getNumber(splitted);
+						if (number == index) {
+							sequence = br.readLine();
+							String plus = br.readLine();
+							if(!plus.startsWith("+")){
+								System.out.println("File isn't fastq");
+								System.exit(-1);
+							}
+							String qual = br.readLine();
+							char[] qualArray = qual.toCharArray();
+							for (char c : qualArray){
+								qua.add(c);
+							}
+							br.close();
+							break;
+						}
+						br.readLine();
+						br.readLine();
+						br.readLine();
+						line = br.readLine();
+					}
+				}
+				
+			} else {
+				System.out.println("Wrong input file");
+				System.exit(-1);
+			}		
 		}
 		catch(Exception e)
 		{
@@ -40,17 +114,17 @@ public class Reader {
 		}
 		
 		char[] seqArray = sequence.toCharArray();
-		List<Character> cList = new ArrayList<Character>();
+		ArrayList<Character> cList = new ArrayList<Character>();
 		for(char c : seqArray) {
 		    cList.add(c);
 		}
 		
-		return cList;
+		Read read = new Read(index, startInd, endInd, offset, cList, qua);
+		return read;
 	}
 
 	
-	public static List<Alignment> GetLayout(String layoutPath)
-	{
+	public static List<Alignment> GetLayout(String layoutPath) {
 		List <Alignment> layoutList = new LinkedList<Alignment>();
 		BufferedReader br = null;
 		
@@ -87,8 +161,8 @@ public class Reader {
 					sCurrentLine = br.readLine();
 					splitted = sCurrentLine.split("[:]");
 					int index = Integer.parseInt(splitted[1]);
-					ArrayList<Character> sequence = (ArrayList<Character>) GetReadFromFasta(index);
-					Read temp = new Read(index, startInd, endInd, offset, sequence);
+					Read temp =  GetReadFromFasta(index, startInd, endInd, offset);
+					
 					layouts.put(Integer.parseInt(splitted[1]), temp);
 				}				
 			}
@@ -104,7 +178,24 @@ public class Reader {
 		{
 			System.out.print(e.getMessage());
 		}
-		
 		return layoutList;
+	}
+	
+	private static long getNumber(String toBeFormatted) {
+		StringBuilder sb = new StringBuilder();
+		char[] characters = toBeFormatted.toCharArray();
+		
+		for (int i = 0; i < characters.length; i++){
+			if (characters[i] == '_') continue;
+			else if (Character.isDigit(characters[i])){
+				sb.append(characters[i]);
+			} else{
+				System.out.println(characters[i]);
+				System.out.println("Invalid format for number");
+				System.exit(-1);
+			}
+		}
+		
+		return Long.parseLong(sb.toString());
 	}
 }

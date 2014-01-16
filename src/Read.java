@@ -12,9 +12,10 @@ public class Read {
 	private int length;
 	private int layoutOffset;
 	public ArrayList<Character> sequence;
+	private ArrayList<Character> quality;
 	
 	// Initializing constructor
-	public Read(int index, int startInd, int endInd, int offset2, ArrayList<Character> seq) {
+	public Read(int index, int startInd, int endInd, int offset2, ArrayList<Character> seq, ArrayList<Character> qua) {
 		this.setId(index);
 		this.setOffset(offset2);
 		this.setStartIndex(startInd);
@@ -22,6 +23,7 @@ public class Read {
 		this.setLayoutOffset(offset2);
 		this.setLength(Math.abs(endInd - startInd));
 		this.sequence = seq;
+		this.quality = qua;
 	}
 	
 	// usual

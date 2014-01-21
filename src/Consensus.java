@@ -37,4 +37,15 @@ public class Consensus {
 	public void setLayoutID(int layoutID) {
 		this.layoutID = layoutID;
 	}
+	
+	public void addDashesInFront() {
+		Metasymbol dash = new Metasymbol();
+		dash.symbols.add('-');
+		this.symbols.add(0, dash);
+	}
+	public void addDashToBack() {
+		Metasymbol dash = new Metasymbol();
+		dash.symbols.add('-');
+		this.symbols.add(dash);
+	}
 }

@@ -34,7 +34,7 @@ public class main {
 		
 		
 		// arguments if not provided
-		double epsilon = 0.05;
+		double epsilon = 0.10;
 		int iterationNumber = 15;
 	    
 

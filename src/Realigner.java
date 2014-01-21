@@ -15,7 +15,7 @@ public class Realigner {
 		for (int col = 0; col < numOfCols; col++) {	
 			char[] column = getColumn(layoutMap,col);
 			Metasymbol consensusSymbol;
-			if (layoutMap.hasQualities) {
+			if (!layoutMap.hasQualities) {
 				char[] qualityColumn = getQualityColumn(layoutMap, col);
 				consensusSymbol = getConsensusMetasymbolWithQuality(column, qualityColumn);
 			} else {
@@ -72,8 +72,8 @@ public class Realigner {
 		
 	    long[] freqs = new long[5];
 	    long[] quals = new long[5];
-	    Arrays.fill(freqs, 5);
-	    Arrays.fill(quals, 5);
+	    Arrays.fill(freqs, 0);
+	    Arrays.fill(quals, 0);
 	    for (int i = 0; i < column.length; i++) {
 	    	if (column[i] == 'A') { 
 	    		freqs[0]++;
@@ -101,24 +101,81 @@ public class Realigner {
 	    
 
 		long max = freqs[0];
-		long maxQuality = quals[0];
+		long maxQuality = 0;
 		for (int counter = 1; counter < freqs.length; counter++)
 		{
 		     if (freqs[counter] > max)
 		     {
 		      max = freqs[counter];
 		     }
-		     if (quals[counter] > maxQuality) {
-		    	 maxQuality = quals[counter];
-		     }
 		}
 		
-		if (freqs[0] == max && quals[0] == maxQuality) sym.symbols.add('A');
-		if (freqs[1] == max && quals[0] == maxQuality) sym.symbols.add('C');
-		if (freqs[2] == max && quals[0] == maxQuality) sym.symbols.add('G');
-		if (freqs[3] == max && quals[0] == maxQuality) sym.symbols.add('T');
-		if (freqs[4] == max && quals[0] == maxQuality) sym.symbols.add('-');
-				
+		if (freqs[0] == max) { 
+			sym.symbols.add('A');
+			if (quals[0] > maxQuality) {
+				maxQuality = quals[0];
+			}
+		}
+		if (freqs[1] == max) { 
+			sym.symbols.add('C');
+			if (quals[1] > maxQuality) {
+				maxQuality = quals[1];
+			}
+		}
+		if (freqs[2] == max) {
+			sym.symbols.add('G');
+			if (quals[2] > maxQuality) {
+				maxQuality = quals[2];
+			}
+		}
+		if (freqs[3] == max) { 
+			sym.symbols.add('T');
+			if (quals[3] > maxQuality) {
+				maxQuality = quals[3];
+			}
+		}
+		if (freqs[4] == max) {
+			sym.symbols.add('-');
+			if (quals[4] > maxQuality) {
+				maxQuality = quals[4];
+			}
+		}
+		
+		if (sym.symbols.size()>1) {
+			List<Character> toRemove = new ArrayList<Character>();
+			for (int counter = 0; counter < sym.symbols.size(); counter++) {
+				char c = sym.symbols.get(counter);
+				if (c=='A') {
+					if (quals[0] < maxQuality) {
+						toRemove.add(c);
+					}
+				}
+				if (c=='C') {
+					if (quals[1] < maxQuality) {
+						toRemove.add(c);
+					}
+				}
+				if (c=='G') {
+					if (quals[2] < maxQuality) {
+						toRemove.add(c);
+					}
+				}
+				if (c=='T') {
+					if (quals[3] < maxQuality) {
+						toRemove.add(c);
+					}
+				}
+				if (c=='-') {
+					if (quals[4] < maxQuality) {
+						toRemove.add(c);
+					}
+				}
+			}
+			sym.symbols.removeAll(toRemove);
+		}
+		if (sym.symbols.size() == 0) {
+			System.out.println();
+		}
 		return sym;
 	}
 	
@@ -196,6 +253,7 @@ public class Realigner {
 		for (int i = 0; i < reads.size(); i++) {
 			Read read = reads.get(i);
 			char c = read.quality.get(index - read.getOffset());		
+			
 			column[i] = c;
 		}
 		return column;
@@ -280,26 +338,24 @@ public class Realigner {
 	
 	
 	private static double getAlignment(Read seqA, Consensus seqB, double eps) {
-			
 	        Consensus mSeqB = new Consensus();
 	        int[][] mD;
 	        int mScore;
 	        String mAlignmentSeqA = "";
 	
 	        int e = (int) (eps/2);
-	        int start = seqA.getOffset() - e;
+	        int start = seqA.getLayoutOffset() - e;
 	        
-	        int end = e + seqA.getOffset() + seqA.getLength();
-	        if (start < 0) {
-	        	start = 0;
-	        	end += e;
-	        }
-	        if (end >= seqB.getSymbols().size()) {
-	        	end = seqB.getSymbols().size()-1;
-	        }
+	        int end = e + seqA.getLayoutOffset() + seqA.getLength();
 	
 	        for (int i = start; i < end;i++){
-	        	mSeqB.getSymbols().add(seqB.getSymbols().get(i));
+	        	if (i < 0) {
+	        		mSeqB.addDashesInFront();
+	        	} else if (i >= seqB.getSymbols().size()) {
+	        		mSeqB.addDashToBack();
+	        	} else {
+	        		mSeqB.getSymbols().add(seqB.getSymbols().get(i));
+	        	}
 	        }
 	                      
 	        mD = new int[seqA.getLength() + 1][mSeqB.getSymbols().size() + 1];
@@ -331,7 +387,8 @@ public class Realigner {
 	        	for (int j = 1; j <= mSeqB.getSymbols().size(); j++) {
 	        		if (j >= i && j <= i + 2*e) {
 		        		int weight = -1;
-		        		if (mSeqB.getSymbols().get(j-1).symbols.contains(seqA.sequence.get(i - 1))) {
+		        		Metasymbol sym = mSeqB.getSymbols().get(j-1);
+		        		if (sym.symbols.contains(seqA.sequence.get(i - 1)) || (sym.symbols.contains('-') && sym.symbols.size()==1)) {
 		        			weight = 0;
 		    			} else {
 		    				weight = -1;
@@ -355,7 +412,9 @@ public class Realigner {
 	        int i = seqA.getLength();
 	        int j = mSeqB.getSymbols().size();
 	       	int maxVal = Integer.MIN_VALUE;
-	       	for (int index = mSeqB.getSymbols().size(); (index > mSeqB.getSymbols().size() - 2*e) && (index > 1) ; index --) {
+	       	int size = mSeqB.getSymbols().size();
+	       	
+	       	for (int index = size; (index > size - 2*e) && (index > 1) ; index --) {
 	    	   if (mD[i][index] > maxVal ) {
 	    		   maxVal = mD[i][index];
 	    		   j = index;
@@ -367,7 +426,8 @@ public class Realigner {
 	        }
 	        while (i > 0 && j > 0) {     
 	        	int weight = -1;
-	        	if (mSeqB.getSymbols().get(j - 1).symbols.contains(seqA.sequence.get(i - 1))) {
+	        	Metasymbol sym = mSeqB.getSymbols().get(j-1);
+        		if (sym.symbols.contains(seqA.sequence.get(i - 1)) || (sym.symbols.contains('-') && sym.symbols.size()==1)) {
 	        		weight = 0;
 	        	} else {
 	        		weight = -1;
@@ -379,27 +439,24 @@ public class Realigner {
 	        		continue;
 	        	} else if (mD[i][j] == mD[i][j-1] - 1) {
 	    			mAlignmentSeqA += "-";
-	    			Metasymbol sym =  mSeqB.getSymbols().get(j-1);
 	    			j--;
 	    			continue;
 	        	} else {
-	        	//	mAlignmentSeqA += seqA.sequence.get(i-1);
+	        		mAlignmentSeqA += seqA.sequence.get(i-1);
 	    			i--;
 	                continue;
 	            }
 	        }           
-	        mAlignmentSeqA = new StringBuffer(mAlignmentSeqA).reverse().toString();
-
-	//        System.out.println("Score: " + mScore);
-	//        System.out.println("Sequence A: " + mAlignmentSeqA);
-	//        System.out.println("Sequence B: " + mAlignmentSeqB);
-	//        
+	        mAlignmentSeqA = new StringBuffer(mAlignmentSeqA).reverse().toString();     
 	        seqA.setLength(mAlignmentSeqA.length());
 	        seqA.setOffset(seqA.getOffset() + j - e);
 			char[] seqArray =  mAlignmentSeqA.toCharArray();
 			seqA.sequence = new ArrayList<Character>();
 			for (int k = 0; k < seqArray.length; k++) {
 				seqA.sequence.add(seqArray[k]);
+				if (seqArray[k] == '-') {
+					seqA.quality.add('!'); // ADD Lowest quality score!
+				}
 			}
 	  
 	        return Math.abs(mScore);

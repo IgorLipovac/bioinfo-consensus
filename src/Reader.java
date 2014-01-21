@@ -11,7 +11,6 @@ import java.util.Map;
 
 public class Reader {
 	
-	private static String readsFilePath;
 	private static Map<Integer,String> allReads;
 	private static Map<Integer,String> allQuals;
 	public static void GetAllReads (String readsFilePath) {
@@ -99,7 +98,6 @@ public class Reader {
 		{
 			System.out.print(e.getMessage());
 		}
-		System.out.print('s');
 	}
 	
 	// This method reads fasta/fastq file and creates read objects
@@ -123,7 +121,6 @@ public class Reader {
 						lays.setLayoutID(laysID);
 						laysID++;
 						layoutList.add(lays);
-						System.out.println(layoutList.size());
 						layouts = new HashMap<Integer, Read>();
 					}
 					
@@ -145,18 +142,23 @@ public class Reader {
 					splitted = sCurrentLine.split("[:]");
 					int index = Integer.parseInt(splitted[1]);
 					String sequence = allReads.get(index);
-					String qual = allReads.get(index);
+					String qual = allQuals.get(index);
 					
 					char[] seqArray = sequence.toCharArray();
 					ArrayList<Character> cList = new ArrayList<Character>();
 					for(char c : seqArray) {
-					    cList.add(c);
+						if (c =='A' || c=='C' || c=='G' || c=='T' || c=='-' || c=='N'){
+							cList.add(c);
+						} else {
+							System.out.println("Wrong input file or format of input file. Character mismatch! Expected ACTG-");
+							System.exit(-1);
+						}
 					}
 					
 					char[] qualArray = qual.toCharArray();
 					ArrayList<Character> qList = new ArrayList<Character>();
 					for(char c : qualArray) {
-					    cList.add(c);
+					    qList.add(c);
 					}
 					
 					

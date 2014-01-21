@@ -8,6 +8,7 @@ public class Alignment {
 
 	private Map<Integer, Read> layoutMap;
 	private int layoutID;
+	public boolean hasQualities;
 	
 	public int getLayoutID() {
 		return layoutID;
@@ -21,6 +22,13 @@ public class Alignment {
 
 	public Alignment(Map<Integer, Read> newLayoutMap) {
 		this.layoutMap = newLayoutMap;
+		Integer firstKey = (Integer) newLayoutMap.keySet().toArray()[0];
+		
+		if (newLayoutMap.get(firstKey).usingQualities) {
+			this.hasQualities = true;
+		} else {
+			this.hasQualities = false;
+		}
 	}
 	
 	

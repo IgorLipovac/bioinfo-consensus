@@ -12,116 +12,98 @@ import java.util.Map;
 public class Reader {
 	
 	private static String readsFilePath;
-	
-	public static void setReadsFilePath (String path) {
-		readsFilePath = path;
-	}
-
-	
-	
-	private static Read GetReadFromFasta(int index, int startInd, int endInd, int offset)
-	{
-		ArrayList<Character> qua = new ArrayList<Character>();
-		String sequence = null;
+	private static Map<Integer,String> allReads;
+	private static Map<Integer,String> allQuals;
+	public static void GetAllReads (String readsFilePath) {
+		allReads = new HashMap<Integer, String>();
+		allQuals = new HashMap<Integer, String>();
 		BufferedReader br = null;
 		try
 		{		
 			br = new BufferedReader(new FileReader(readsFilePath));
-			String line = br.readLine();
-			if (line.startsWith(">")){
-				String[] splitt = line.split("_L");
-				if (splitt.length < 2){
-					int currentLine=0;
-					while(currentLine!=(index-1)*2)
-					{
-						br.readLine();
-						currentLine++;
-					}
-					sequence = br.readLine();
-					br.close();
-				}  else {
-					while(line != null){
-						String part = line.split("_L")[0];
-						String splitted = part.split("_",2)[1];
-						Long number = getNumber(splitted);
-						if (number == index) {
-							sequence = br.readLine();
-							br.close();
-							break;
+			//FASTA
+			if (readsFilePath.endsWith(".fasta") || readsFilePath.endsWith(".fa") || readsFilePath.endsWith(".fna")) {
+				String line = br.readLine();
+				Integer indexOrder = 0;
+				Integer index = indexOrder;
+				String sequence = "";
+				String qua = "";
+				while (line!=null) {
+					if (line.startsWith(">")){
+						if (sequence!="") {
+							allReads.put(index, sequence);
+							allQuals.put(index, qua);
+							sequence = "";
+							qua = "";
+							indexOrder++;
 						}
-						br.readLine();
-						line = br.readLine();
-					}				
-				}			
-			} else if (line.startsWith("@")){
-				String[] splitt = line.split("_L");
-				if (splitt.length < 2){
-					int currentLine=0;
-					while(currentLine!=(index-1)*4)
-					{
-						br.readLine();
-						br.readLine();
-						br.readLine();
-						currentLine += 3;
-					}
-					sequence = br.readLine();
-					String plus = br.readLine();
-					if(!plus.startsWith("+")){
-						System.out.println("File isn't fastq");
-						System.exit(-1);
-					}
-					String qual = br.readLine();
-					char[] qualArray = qual.toCharArray();
-					for (char c : qualArray){
-						qua.add(c);
-					}
-					br.close();
-				} else {
-					while(line != null){
-						String part = line.split("_L")[0];
-						String splitted = part.split("_",2)[1];
-						Long number = getNumber(splitted);
-						if (number == index) {
-							sequence = br.readLine();
-							String plus = br.readLine();
-							if(!plus.startsWith("+")){
-								System.out.println("File isn't fastq");
-								System.exit(-1);
-							}
-							String qual = br.readLine();
-							char[] qualArray = qual.toCharArray();
-							for (char c : qualArray){
-								qua.add(c);
-							}
-							br.close();
-							break;
+						String[] splitt = line.split("_L");
+						if (splitt.length == 2){
+							String part = line.split("_L")[0];
+							String splitted = part.split("_",2)[1];
+							Integer number = getNumber(splitted);
+							index = number;
+						} else {
+							index = indexOrder;
 						}
-						br.readLine();
-						br.readLine();
-						br.readLine();
-						line = br.readLine();
+						
+					} else {
+						sequence += line;
 					}
+					line = br.readLine();
+					
 				}
-				
+			}
+			else if (readsFilePath.endsWith(".fq") || readsFilePath.endsWith(".fastq") || readsFilePath.endsWith(".fnq")){
+				String line = br.readLine();
+				Integer indexOrder = 0;
+				Integer index = indexOrder;
+				String sequence = "";
+				String qua = "";
+				while (line!=null) {
+					if (line.startsWith("@")){
+						if (sequence!="") {
+							allReads.put(index, sequence);
+							allQuals.put(index, qua);
+							sequence = "";
+							qua ="";
+							indexOrder++;
+						}
+						String[] splitt = line.split("_L");
+						if (splitt.length == 2){
+							String part = line.split("_L")[0];
+							String splitted = part.split("_",2)[1];
+							Integer number = getNumber(splitted);
+							index = number;
+						} else {
+							index = indexOrder;
+						}
+						sequence = br.readLine();
+						String plus = br.readLine();
+						if(!plus.startsWith("+")){
+							System.out.println("File isn't fastq");
+							System.exit(-1);
+						}
+						qua = br.readLine();
+						line = br.readLine();
+					}
+					
+				}
+			
 			} else {
-				System.out.println("Wrong input file");
+				System.out.println("Wrong input file or format of input file.");
 				System.exit(-1);
-			}		
-		}
+			}	
+		} 
 		catch(Exception e)
 		{
 			System.out.print(e.getMessage());
 		}
-		
-		char[] seqArray = sequence.toCharArray();
-		ArrayList<Character> cList = new ArrayList<Character>();
-		for(char c : seqArray) {
-		    cList.add(c);
-		}
-		
-		Read read = new Read(index, startInd, endInd, offset, cList, qua);
-		return read;
+		System.out.print('s');
 	}
+	
+	// This method reads fasta/fastq file and creates read objects
+	
 
 	
 	public static List<Alignment> GetLayout(String layoutPath) {
@@ -141,6 +123,7 @@ public class Reader {
 						lays.setLayoutID(laysID);
 						laysID++;
 						layoutList.add(lays);
+						System.out.println(layoutList.size());
 						layouts = new HashMap<Integer, Read>();
 					}
 					
@@ -161,7 +144,23 @@ public class Reader {
 					sCurrentLine = br.readLine();
 					splitted = sCurrentLine.split("[:]");
 					int index = Integer.parseInt(splitted[1]);
-					Read temp =  GetReadFromFasta(index, startInd, endInd, offset);
+					String sequence = allReads.get(index);
+					String qual = allReads.get(index);
+					
+					char[] seqArray = sequence.toCharArray();
+					ArrayList<Character> cList = new ArrayList<Character>();
+					for(char c : seqArray) {
+					    cList.add(c);
+					}
+					
+					char[] qualArray = qual.toCharArray();
+					ArrayList<Character> qList = new ArrayList<Character>();
+					for(char c : qualArray) {
+					    cList.add(c);
+					}
+					
+					
+					Read temp =  new Read(index, startInd, endInd, offset, cList, qList);
 					
 					layouts.put(Integer.parseInt(splitted[1]), temp);
 				}				
@@ -178,10 +177,13 @@ public class Reader {
 		{
 			System.out.print(e.getMessage());
 		}
+		
+		allQuals.clear();
+		allReads.clear();
 		return layoutList;
 	}
 	
-	private static long getNumber(String toBeFormatted) {
+	private static Integer getNumber(String toBeFormatted) {
 		StringBuilder sb = new StringBuilder();
 		char[] characters = toBeFormatted.toCharArray();
 		
@@ -196,6 +198,6 @@ public class Reader {
 			}
 		}
 		
-		return Long.parseLong(sb.toString());
+		return Integer.parseInt(sb.toString());
 	}
 }

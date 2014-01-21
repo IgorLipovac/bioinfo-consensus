@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,7 +14,13 @@ public class Realigner {
 		double f2score = 0.0;
 		for (int col = 0; col < numOfCols; col++) {	
 			char[] column = getColumn(layoutMap,col);
-			Metasymbol consensusSymbol = getConsensusMetasymbol(column);
+			Metasymbol consensusSymbol;
+			if (layoutMap.hasQualities) {
+				char[] qualityColumn = getQualityColumn(layoutMap, col);
+				consensusSymbol = getConsensusMetasymbolWithQuality(column, qualityColumn);
+			} else {
+				consensusSymbol = getConsensusMetasymbol(column);
+			}
 			consensus.getSymbols().add(consensusSymbol);
 			f1score += getColumnScore(column, consensusSymbol);
 			if (column.length > 0) {
@@ -56,6 +63,61 @@ public class Realigner {
 		if (freqs.get(2) == max) sym.symbols.add('G');
 		if (freqs.get(3) == max) sym.symbols.add('T');
 		if (freqs.get(4) == max) sym.symbols.add('-');
+				
+		return sym;
+	}
+	
+	private static Metasymbol getConsensusMetasymbolWithQuality(char[] column, char[] qualityColumn) {
+		Metasymbol sym = new Metasymbol();
+		
+	    long[] freqs = new long[5];
+	    long[] quals = new long[5];
+	    Arrays.fill(freqs, 5);
+	    Arrays.fill(quals, 5);
+	    for (int i = 0; i < column.length; i++) {
+	    	if (column[i] == 'A') { 
+	    		freqs[0]++;
+	    		quals[0] += qualityColumn[i];
+	    	}
+	    	
+	    	if (column[i]  == 'C') { 
+	    		freqs[1]++;
+	    		quals[1] += qualityColumn[i];
+	    	}
+	    	if (column[i]  == 'G') { 
+	    		freqs[2]++;
+	    		quals[2] += qualityColumn[i];
+	    	}
+	    	if (column[i]  == 'T') { 
+	    		freqs[3]++;
+	    		quals[3] += qualityColumn[i];
+	    	}
+	    	if (column[i]  == '-') { 
+	    		freqs[4]++;
+	    		quals[4] += qualityColumn[i];
+	    	}
+	    	
+	    }
+	    
+
+		long max = freqs[0];
+		long maxQuality = quals[0];
+		for (int counter = 1; counter < freqs.length; counter++)
+		{
+		     if (freqs[counter] > max)
+		     {
+		      max = freqs[counter];
+		     }
+		     if (quals[counter] > maxQuality) {
+		    	 maxQuality = quals[counter];
+		     }
+		}
+		
+		if (freqs[0] == max && quals[0] == maxQuality) sym.symbols.add('A');
+		if (freqs[1] == max && quals[0] == maxQuality) sym.symbols.add('C');
+		if (freqs[2] == max && quals[0] == maxQuality) sym.symbols.add('G');
+		if (freqs[3] == max && quals[0] == maxQuality) sym.symbols.add('T');
+		if (freqs[4] == max && quals[0] == maxQuality) sym.symbols.add('-');
 				
 		return sym;
 	}
@@ -121,6 +183,24 @@ public class Realigner {
 		}
 		return column;
 	}
+	
+	private static char[] getQualityColumn (Alignment layoutMap, int index) {
+		List<Read> reads = new ArrayList<Read>();
+		for (Read lay : layoutMap.values()) {
+			if (lay.getOffset() <= index && index < lay.getOffset() + lay.getLength()) {
+				reads.add(lay);
+			}
+		}
+		
+		char[] column = new char[reads.size()];
+		for (int i = 0; i < reads.size(); i++) {
+			Read read = reads.get(i);
+			char c = read.quality.get(index - read.getOffset());		
+			column[i] = c;
+		}
+		return column;
+	}
+	
 	
 	// compares column and metasymbol
 	private static double getColumnScore (char[] column, Metasymbol sym) {

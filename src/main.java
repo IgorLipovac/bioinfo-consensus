@@ -29,9 +29,9 @@ public class main {
 			return;
 		}
 		
-		
-		Reader.setReadsFilePath(args[0]);
+		Reader.GetAllReads(args[0]);
 		List<Alignment> test = Reader.GetLayout( args[1]);
+		
 		
 		// arguments if not provided
 		double epsilon = 0.05;

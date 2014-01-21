@@ -15,7 +15,7 @@ public class Realigner {
 		for (int col = 0; col < numOfCols; col++) {	
 			char[] column = getColumn(layoutMap,col);
 			Metasymbol consensusSymbol;
-			if (!layoutMap.hasQualities) {
+			if (layoutMap.hasQualities) {
 				char[] qualityColumn = getQualityColumn(layoutMap, col);
 				consensusSymbol = getConsensusMetasymbolWithQuality(column, qualityColumn);
 			} else {

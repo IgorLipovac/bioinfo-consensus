@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -130,10 +131,12 @@ public class Reader {
 					int startInd = Integer.parseInt(splitted[1]);
 					int endInd = Integer.parseInt(splitted[2]);
 					// reverse orientation
+					boolean isReverse = false;
 					if (startInd > endInd) {
 						int temp = startInd;
 						startInd = endInd;
 						endInd = temp;
+						isReverse = true;
 					}
 					sCurrentLine = br.readLine();
 					splitted = sCurrentLine.split("[:]");
@@ -145,6 +148,7 @@ public class Reader {
 					String qual = allQuals.get(index);
 					
 					char[] seqArray = sequence.toCharArray();
+					
 					ArrayList<Character> cList = new ArrayList<Character>();
 					for(char c : seqArray) {
 						if (c =='A' || c=='C' || c=='G' || c=='T' || c=='-' || c=='N'){
@@ -161,6 +165,10 @@ public class Reader {
 					    qList.add(c);
 					}
 					
+					if (isReverse) {
+						Collections.reverse(qList);
+						Collections.reverse(cList);
+					}
 					
 					Read temp =  new Read(index, startInd, endInd, offset, cList, qList);
 					
@@ -177,7 +185,7 @@ public class Reader {
 		}
 		catch(Exception e)
 		{
-			System.out.print(e.getMessage());
+			System.out.print("Something went wrong - there is a possibility if layout file is wrong. Possible duplicate Reads in same LAY.");
 		}
 		
 		allQuals.clear();

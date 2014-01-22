@@ -35,7 +35,7 @@ First parameter is always a path to file containing FASTA format reads and secon
 You can also try with example files given in test_1, test_2 and test_3 folders.
 
 For some testing purposes we used scripts from: https://github.com/vzupanovic/skripte<br/>
-More about the algorithm, results and program itself - see documentation (coming soon)!<br/>
+More about the algorithm, results and program itself - see documentation (unfortunately, only in Croatian)<br/>
 And also - please support our friends:<br/>
 [#24hBioInfo](https://www.facebook.com/24hprojectchallenge "Check out the construction of this awesome project!")
 

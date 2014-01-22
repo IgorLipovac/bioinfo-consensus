@@ -12,7 +12,7 @@ Run instructions
 ---------------------
 
 Program requires Java installed.<br/>
-Program usage - just call jar executable from console. <br/> 
+Program using - just call jar executable from console. <br/> 
 Simple working example:
 ```shell
 java -jar realigner.jar test_2/readsInput2.fasta test_2/layouts2.afg -e0.1 -i10

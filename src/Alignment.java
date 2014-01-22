@@ -19,7 +19,11 @@ public class Alignment {
 		this.layoutID = layoutID;
 	}
 
-
+	/**
+	 * Creating a new alignment
+	 * @param newLayoutMap Map containing all reads
+	 */
+	
 	public Alignment(Map<Integer, Read> newLayoutMap) {
 		this.layoutMap = newLayoutMap;
 		Integer firstKey = (Integer) newLayoutMap.keySet().toArray()[0];
@@ -44,7 +48,11 @@ public class Alignment {
 		return this.layoutMap.values();
 	}
 	
-	
+	/**
+	 * Method for detaching a read from alignment
+	 * @param index Index of the read to be detached.
+	 * @return The detached read
+	 */
 	public Read detachFromAlignmentOnIndex(Integer index) {
 		Read detached = this.layoutMap.get(index);
 		this.layoutMap.remove(index);
@@ -52,10 +60,18 @@ public class Alignment {
 		return detached;
 	}
 	
+	/**
+	 * Puts a new read into the alignment
+	 * @param sequence Sequence to be added.
+	 */
 	public void insertSequenceIntoAlignment(Read sequence) {
 		this.layoutMap.put(sequence.getId(), sequence);
 		resetOffsets();
 	}
+	
+	/**
+	 * Resets offsets in layout due to read movement
+	 */
 	
 	private void resetOffsets () {
 		int minOffset = 0;

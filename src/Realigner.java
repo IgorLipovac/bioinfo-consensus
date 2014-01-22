@@ -6,7 +6,11 @@ import java.util.List;
 
 public class Realigner {
 
-	
+	/**
+	 * Creates consensus and scores it using scoring functions
+	 * @param layoutMap map of reads 
+	 * @return Consensus object
+	 */
 	public static Consensus getConsensus (Alignment layoutMap) {
 		int numOfCols = getNumberOfColumns(layoutMap);
 		Consensus consensus = new Consensus(layoutMap.getLayoutID());
@@ -30,7 +34,9 @@ public class Realigner {
 		consensus.setConsensusScore(0.5 * f1score + 0.5 * f2score);
 		return consensus;
 	}
-	
+	/**
+	 *  pairwise consensus score function (not used)
+	 */
 	private static void scoreConsensus (Consensus consensus, Alignment layoutMap) {
 		consensus.setConsensusScore(0.f);
 		int numOfCols = getNumberOfColumns(layoutMap);
@@ -41,7 +47,9 @@ public class Realigner {
 		}
 	}
 	
-	
+	/**
+	 *  Method that computes consensus bases from column
+	 */
 	private static Metasymbol getConsensusMetasymbol(char[] column) {
 		Metasymbol sym = new Metasymbol();
 		
@@ -67,6 +75,9 @@ public class Realigner {
 		return sym;
 	}
 	
+	/**
+	 *  Method that computes consensus bases from column using qualities of bases
+	 */
 	private static Metasymbol getConsensusMetasymbolWithQuality(char[] column, char[] qualityColumn) {
 		Metasymbol sym = new Metasymbol();
 		
@@ -179,17 +190,19 @@ public class Realigner {
 		return sym;
 	}
 	
-
+	/**
+	 *  pairwise consensus score - weighted combination of two scoring functions
+	 */
 	private static double getConsensusScoreWeighted (Read detachedSeq, Consensus consensus, Alignment subalignment) {
 		double f1score = getConsensusScoreWithFunction1(detachedSeq, consensus);
 		double f2score = getConsensusScoreWithFunction2(detachedSeq, subalignment);
-		
 		double weightedScore = 0.5 * f1score + 0.5 * f2score;
 		return weightedScore;
-			
 	}
 	
-	// get consensus score between subalignment and detached sequence
+	/**
+	 *  pairwise consensus score - weighted combination of two scoring functions
+	 */
 	private static double getConsensusScoreWithFunction1(Read sequence, Consensus consensus) {
 		double score = 0;
 		// takes into account that S + c(endgap) scores 0;
@@ -206,8 +219,9 @@ public class Realigner {
 		return score;
 	}
 	
-	// gets consensus score with a function that takes weighted approach between detached sequence
-	// and subalignment layout - NOT CONSENSUS!
+	/**
+	 *  pairwise consensus score - second function, returns double
+	 */
 	private static double getConsensusScoreWithFunction2(Read sequence, Alignment layoutMap) {
 		double score = 0;
 		// takes into account that S + c(endgap) scores 0;
@@ -303,7 +317,9 @@ public class Realigner {
 	
 
 	
-	// removes dashes if needed
+	/**
+	 * Removes dashes from consensus
+	 */
 	private static void dashFunction(Consensus consensus) {
 		List <Integer> indexesToRemove = new ArrayList<Integer>();
 		for (int col = 0; col < consensus.getSymbols().size(); col++) {
@@ -318,7 +334,9 @@ public class Realigner {
 		}
 	}
 	
-	
+	/**
+	 *  Removes dashes from read
+	 */
 	private static void dashFunction(Read read) {
 		List <Integer> indexesToRemove = new ArrayList<Integer>();
 		for (int col = 0; col < read.sequence.size(); col++) {
@@ -336,7 +354,12 @@ public class Realigner {
 	}
 	
 	
-	
+	/**
+	 *  Alignment function  Needleman Wunsch algorithm
+	 *  @param seqA  detached sequence
+	 *  @param seqB  consensus sequence
+	 *  @param eps  eps
+	 */
 	private static double getAlignment(Read seqA, Consensus seqB, double eps) {
 	        Consensus mSeqB = new Consensus();
 	        int[][] mD;
@@ -350,7 +373,7 @@ public class Realigner {
 	
 	        for (int i = start; i < end;i++){
 	        	if (i < 0) {
-	        		mSeqB.addDashesInFront();
+	        		mSeqB.addDashInFront();
 	        	} else if (i >= seqB.getSymbols().size()) {
 	        		mSeqB.addDashToBack();
 	        	} else {
@@ -462,6 +485,12 @@ public class Realigner {
 	        return Math.abs(mScore);
 	}
 	
+	/**
+	 *  ReAligner
+	 *  @param  layoutMap map of reads
+	 *  @param  epsilonPrecision - predicted error of read layout, in percentage (0.0 to 1.0)
+	 *  @param  numOfIterations max number of iterations
+	 */
 	
 	public static Consensus reAlign(Alignment layoutMap, double epsilonPrecision, int numOfIterations) {
 		Consensus consensus = getConsensus(layoutMap);

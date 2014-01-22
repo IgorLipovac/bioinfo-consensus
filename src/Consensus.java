@@ -10,6 +10,9 @@ public class Consensus {
 	private double consensusScore;
 	private int layoutID;
 	
+	/**
+	 * Create a new empty Consensus with no score.
+	 */
 	public Consensus() {
 		this.setSymbols(new ArrayList<Metasymbol>());
 		this.setConsensusScore(0.f);
@@ -38,11 +41,17 @@ public class Consensus {
 		this.layoutID = layoutID;
 	}
 	
-	public void addDashesInFront() {
+	/**
+	 * Add dash in the from of the consensus.
+	 */
+	public void addDashInFront() {
 		Metasymbol dash = new Metasymbol();
 		dash.symbols.add('-');
 		this.symbols.add(0, dash);
 	}
+	/**
+	 * Add dash at the end of the consensus.
+	 */
 	public void addDashToBack() {
 		Metasymbol dash = new Metasymbol();
 		dash.symbols.add('-');

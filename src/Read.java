@@ -15,7 +15,15 @@ public class Read {
 	public ArrayList<Character> quality;
 	public boolean usingQualities;
 	
-	// Initializing constructor
+	/**
+	 * Create a new read with his index, the start and end index of symbols, offset, sequence and quality
+	 * @param index Index of the read.
+	 * @param startInd Starting index of the sequence.
+	 * @param endInd End index of the sequence.
+	 * @param offset2 Offset of the read.
+	 * @param seq The sequence of the read
+	 * @param qua Quality of every symbol in the sequence
+	 */
 	public Read(int index, int startInd, int endInd, int offset2, ArrayList<Character> seq, ArrayList<Character> qua) {
 		this.setId(index);
 		this.setOffset(offset2);
@@ -32,7 +40,14 @@ public class Read {
 		this.quality = qua;
 	}
 	
-	// usual
+	/**
+	 * Create a new read with his index, the start and end index of symbols, offset and sequence.
+	 * @param index Index of the read.
+	 * @param startInd Starting index of the sequence.
+	 * @param endInd End index of the sequence.
+	 * @param layoutOffset Offset of the read.
+	 * @param seq The sequence of the read
+	 */
 	public Read(int index, int startInd, int endInd, int offset2, int layoutOffset, String seq) {
 		this.setId(index);
 		this.setOffset(offset2);
@@ -94,7 +109,10 @@ public class Read {
 	public void setLayoutOffset(int layoutOffset) {
 		this.layoutOffset = layoutOffset;
 	}
-	
+	/**
+	 * Insert a gap in the read.
+	 * @param index Index of the position where the gap should be inserted.
+	 */
 	public void insertGapAt(int index) {
 		this.setEndIndex(this.getEndIndex() + 1);
 		this.setLength(this.getLength() + 1);

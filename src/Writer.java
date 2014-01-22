@@ -5,6 +5,13 @@ import java.util.ArrayList;
 
 
 public class Writer {
+	
+	/**
+	 * Prints consensus sequence containing gaps
+	 * @param path path to file
+	 * @param consensus consensus to print
+	 * @param append should append or create new file
+	 */
 
 	public static void printGappedConsensusToFile(String path, Consensus consensus,boolean append) {
 		
@@ -32,6 +39,13 @@ public class Writer {
 		}
 		
 	}
+	
+	/**
+	 * Prints consensus sequence without gaps
+	 * @param path path to file
+	 * @param consensus consensus to print
+	 * @param append should append or create new file
+	 */
 	public static void printUngappedConsensusToFile(Consensus consensus, boolean append) {
 		
 		try {

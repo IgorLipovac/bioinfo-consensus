@@ -14,6 +14,12 @@ public class Reader {
 	
 	private static Map<Integer,String> allReads;
 	private static Map<Integer,String> allQuals;
+	
+	
+	/**
+	 * Method that reads a fasta/fastq file and reads all the reads in the file.
+	 * @param readsFilePath Path to the file containing the reads.
+	 */
 	public static void GetAllReads (String readsFilePath) {
 		allReads = new HashMap<Integer, String>();
 		allQuals = new HashMap<Integer, String>();
@@ -114,10 +120,11 @@ public class Reader {
 		}
 	}
 	
-	// This method reads fasta/fastq file and creates read objects
-	
-
-	
+	/**
+	 * Method that reads a file containing all the layouts and creates a list of Alignments.
+	 * @param layoutPath Path to the file to be read.
+	 * @return List of alignments found in the file.
+	 */
 	public static List<Alignment> GetLayout(String layoutPath) {
 		List <Alignment> layoutList = new LinkedList<Alignment>();
 		BufferedReader br = null;

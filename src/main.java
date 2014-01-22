@@ -30,6 +30,7 @@ public class main {
 		}
 		
 		Reader.GetAllReads(args[0]);
+		
 		List<Alignment> test = Reader.GetLayout( args[1]);
 		
 		

@@ -53,6 +53,13 @@ public class Reader {
 					line = br.readLine();
 					
 				}
+				if (sequence!="") {
+					allReads.put(index, sequence);
+					allQuals.put(index, qua);
+					sequence = "";
+					qua = "";
+					indexOrder++;
+				}
 			}
 			else if (readsFilePath.endsWith(".fq") || readsFilePath.endsWith(".fastq") || readsFilePath.endsWith(".fnq")){
 				String line = br.readLine();
@@ -87,7 +94,13 @@ public class Reader {
 						qua = br.readLine();
 						line = br.readLine();
 					}
-					
+					if (sequence!="") {
+						allReads.put(index, sequence);
+						allQuals.put(index, qua);
+						sequence = "";
+						qua ="";
+						indexOrder++;
+					}
 				}
 			
 			} else {

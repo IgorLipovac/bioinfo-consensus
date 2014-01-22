@@ -1,7 +1,7 @@
 bioinfo-consensus > ReAligner
 =============================
 
-This program is created as a project assignment for Bioinformatics class (Faculty of Electrical Engineering and Computing, University of Zagreb).
+This program was created as a project assignment for Bioinformatics class (Faculty of Electrical Engineering and Computing, University of Zagreb).
 It implements iterative realigning algorithm described in:
 
 **ReAligner: a program for refining DNA sequence multi-alignments.**  [link](http://online.liebertpub.com/doi/abs/10.1089/cmb.1997.4.369)<br/>

@@ -192,7 +192,7 @@ public class Reader {
 					
 					Read temp =  new Read(index, startInd, endInd, offset, cList, qList);
 					
-					layouts.put(Integer.parseInt(splitted[1]), temp);
+					layouts.put(index, temp);
 				}				
 			}
 			if (!layouts.isEmpty()) {
